@@ -1,36 +1,36 @@
-const Thing = require('../models/Thing');
+const Sauce = require('../models/Sauce');
 const fs = require('fs');
 var sanitize = require('mongo-sanitize');
 
-exports.createThing = (req, res, next) => {
-  const thing = new Thing({
+exports.createSauce = (req, res, next) => {
+  const sauce = new Sauce({
     ...JSON.parse(req.body.sauce),
     likes: 0,
     dislikes: 0,
     imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
   });
-  thing.save()
+  sauce.save()
     .then(() => res.status(201).json({ message: 'Objet enregistré !'}))
     .catch(error => res.status(400).json({ error }));
   };
 
-exports.getOneThing = (req, res, next) => {
-  Thing.findOne({ _id: req.params.id })
-    .then(thing => res.status(200).json(thing))
+exports.getOneSauce = (req, res, next) => {
+  Sauce.findOne({ _id: req.params.id })
+    .then(sauce => res.status(200).json(sauce))
     .catch(error => res.status(404).json({ error }));
 };
 
-exports.modifyThing = (req, res, next) => {
-  Thing.findOne({ _id: req.params.id })
-    .then(thing => {
-      const filename = thing.imageUrl.split('/images/')[1];
+exports.modifySauce = (req, res, next) => {
+  Sauce.findOne({ _id: req.params.id })
+    .then(sauce => {
+      const filename = sauce.imageUrl.split('/images/')[1];
       if (req.file != null) fs.unlink(`images/${filename}`, () => {});
-      const thingObject = req.file ?
+      const sauceObject = req.file ?
       {
         ...JSON.parse(req.body.sauce),
         imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
       } : { ...req.body };
-      Thing.updateOne({ _id: req.params.id }, { ...thingObject, _id: req.params.id })
+      Sauce.updateOne({ _id: req.params.id }, { ...sauceObject, _id: req.params.id })
         .then(() => res.status(200).json({ message: 'Objet modifié !'}))
         .catch(error => res.status(400).json({ error }));
     })  
@@ -39,12 +39,12 @@ exports.modifyThing = (req, res, next) => {
 
 
 
-exports.deleteThing = (req, res, next) => {
-  Thing.findOne({ _id: req.params.id })
-    .then(thing => {
-      const filename = thing.imageUrl.split('/images/')[1];
+exports.deleteSauce = (req, res, next) => {
+  Sauce.findOne({ _id: req.params.id })
+    .then(sauce => {
+      const filename = sauce.imageUrl.split('/images/')[1];
       fs.unlink(`images/${filename}`, () => {
-        Thing.deleteOne({ _id: req.params.id })
+        Sauce.deleteOne({ _id: req.params.id })
           .then(() => res.status(200).json({ message: 'Objet supprimé !'}))
           .catch(error => res.status(400).json({ error }));
       });
@@ -52,25 +52,25 @@ exports.deleteThing = (req, res, next) => {
     .catch(error => res.status(500).json({ error }));
 };
 
-exports.getAllStuff = (req, res, next) => {
-  Thing.find()
-    .then(things => res.status(200).json(things))
+exports.getAllSauces = (req, res, next) => {
+  Sauce.find()
+    .then(sauces => res.status(200).json(sauces))
     .catch(error => res.status(400).json({ error }));
 };
 
-exports.modifyLikeThing = (req, res, next) => {
-  Thing.findOne({ _id: req.params.id })
-      .then(thing => {
+exports.modifyLikeSauce = (req, res, next) => {
+  Sauce.findOne({ _id: req.params.id })
+      .then(sauce => {
         let arrayLike = new Array();
         let arrayDislike = new Array();
-        for (let i = 0; i < thing.usersLiked.length; i++) {
-          if (thing.usersLiked[i] != req.body.userId) {
-            arrayLike[arrayLike.length] = thing.usersLiked[i];
+        for (let i = 0; i < sauce.usersLiked.length; i++) {
+          if (sauce.usersLiked[i] != req.body.userId) {
+            arrayLike[arrayLike.length] = sauce.usersLiked[i];
           }
         };
-        for (let i = 0; i < thing.usersDisliked.length; i++) {
-          if (thing.usersDisliked[i] != req.body.userId) {
-            arrayDislike[arrayDislike.length] = thing.usersDisliked[i];
+        for (let i = 0; i < sauce.usersDisliked.length; i++) {
+          if (sauce.usersDisliked[i] != req.body.userId) {
+            arrayDislike[arrayDislike.length] = sauce.usersDisliked[i];
           }
         };
         if (req.body.like > 0) {
@@ -79,14 +79,14 @@ exports.modifyLikeThing = (req, res, next) => {
         if (req.body.like < 0) {
           arrayDislike[arrayDislike.length] = req.body.userId;
         }
-        const thingObject = 
+        const sauceObject = 
         {
           likes: arrayLike.length,
           dislikes: arrayDislike.length,
           usersDisliked : arrayDislike,
           usersLiked: arrayLike,
         };
-        Thing.updateOne({ _id: req.params.id }, { ...thingObject, _id: req.params.id })
+        Sauce.updateOne({ _id: req.params.id }, { ...sauceObject, _id: req.params.id })
           .then(() => res.status(200).json({ message: 'Objet modifié !'}))
           .catch(error => res.status(400).json({ error }));
       })

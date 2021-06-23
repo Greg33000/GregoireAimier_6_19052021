@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const thingSchema = mongoose.Schema({
+const sauceSchema = mongoose.Schema({
   // id: { type: String, required: true }, // id: ObjectID — identifiant unique créé par MongoDB ;
   userId: { type: String, required: true }, // identifiant unique MongoDB pour l'utilisateur qui a créé la sauce
   name: { type: String, required: true }, // nom de la sauce
@@ -16,4 +16,4 @@ const thingSchema = mongoose.Schema({
 });
 
 
-module.exports = mongoose.model('Thing', thingSchema);
+module.exports = mongoose.model('Thing', sauceSchema);

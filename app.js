@@ -1,8 +1,9 @@
 const express = require('express');
-const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const mongoSanitize = require('express-mongo-sanitize');
-const stuffRoutes = require('./routes/stuff');
+const helmet = require("helmet");
+require('dotenv').config();
+const sauceRoutes = require('./routes/sauce');
 const userRoutes = require('./routes/user');
 const path = require('path');
 
@@ -10,7 +11,7 @@ const app = express();
 
 
 // connection a MongoDB
-mongoose.connect('mongodb+srv://Project6_admin2:MyBestPassword@cluster0.ke3qs.mongodb.net/greg33?retryWrites=true&w=majority',
+mongoose.connect(process.env.DB_URL,
   { useNewUrlParser: true,
     useUnifiedTopology: true })
   .then(() => console.log('Connexion à MongoDB réussie !'))
@@ -24,9 +25,12 @@ app.use((req, res, next) => {
   next();
 });
 
-// body parser
-app.use(bodyParser.json());
+// Helmet : connect-style middleware for security
+app.use(helmet());
 
+ 
+// parse application/json => deprecated. Express le fait depuis la version 4.16+
+app.use(express.json())
 
 // contre les injections SQL : express-mongo-sanitize
 app.use(mongoSanitize());
@@ -36,7 +40,7 @@ app.use(mongoSanitize());
 app.use('/images', express.static(path.join(__dirname, 'images')));
 
 // routes 
-app.use('/api/sauces', stuffRoutes);
+app.use('/api/sauces', sauceRoutes);
 app.use('/api/auth', userRoutes);
 
 module.exports = app;
